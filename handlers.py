@@ -1,40 +1,49 @@
 
+import re
+
+
+FOOD = ['pizza', 'burger', 'sushi']
+SIZES = ['большую', 'среднюю', 'маленькую']
+PAY = ['картой', 'наличными']
+CONFIRM = ['да', 'нет, начать заново']
 
 
 def handle_size(text, context):
-    match = find_identical(text, size_var)
-    if match:
-        context['size'] = match
-        return True
+
+    for s in SIZES:
+        if s in text:
+            context['size'] = s
+            context['variables'] = PAY
+            return True
     else:
-        context['variables'] = [key for key, value in size_var.items()]
+        context['variables'] = SIZES
         return False
 
 
 def handle_pay(text, context):
-    match = find_identical(text, pay_var)
-    if match:
-        context['pay'] = match
-        return True
+
+    for s in PAY:
+        if s in text:
+            context['pay'] = s
+            context['variables'] = CONFIRM
+            return True
     else:
-        context['variables'] = [key for key, value in pay_var.items()]
+        context['variables'] = PAY
         return False
 
-
-
-def find_identical(text, identical):
-    for key, value in identical.items():
-        result = value.match(text)
-        if result:
-            return key
-
-
-size_var = {
-    'Большая': re.compile(r"^[Б|б]ол"),
-    'Маленькая': re.compile(r"^[М|м]ал"),
-}
-
-pay_var = {
-    'Наличными курьеру': re.compile(r"^[Н|н]ал"),
-    'Картой онлайн': re.compile(r"^[К|к]арт"),
-}
+def handle_confirm(text, context):
+    if "return_to" in context:
+        context.pop('return_to')
+        context.pop('variables')
+    context['confirm'] = False
+    if text == 'да':
+        context['confirm'] = True
+        return True
+    # elif text == '1':
+    #     context['return_to'] = "step_1"   # по логике continue_scenario  добавит +1
+    #     return True
+    # elif text == '2':
+    #     context['return_to'] = "step_2"   # по логике continue_scenario  добавит +1
+    #     return True
+    else:
+        return False
